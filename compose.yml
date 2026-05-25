@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: myfavoriteplaces
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d myfavoriteplaces"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      # URL complète standard
+      DATABASE_URL: postgres://postgres:password@db:5432/myfavoriteplaces
+      # Variables découpées au cas où l'application les lirait individuellement
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_NAME: myfavoriteplaces
+      DB_DATABASE: myfavoriteplaces
+      TYPEORM_HOST: db
+      TYPEORM_PORT: 5432
+      TYPEORM_USERNAME: postgres
+      TYPEORM_PASSWORD: password
+      TYPEORM_DATABASE: myfavoriteplaces
+    restart: unless-stopped 
+    depends_on:
+      db:
+        condition: service_healthy
+    # On commente ces lignes pour que Docker utilise uniquement les fichiers compilés à l'intérieur de l'image
+    # volumes:
+    #   - ./server:/app
+    #   - /app/node_modules
+
+  client:
+    build: ./client
+    ports:
+      - "5173:5173"
+    restart: unless-stopped 
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:
