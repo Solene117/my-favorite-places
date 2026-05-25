@@ -1,0 +1,55 @@
+name: Continuous Integration (CI)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code du dépôt
+        uses: actions/checkout@v4
+
+      - name: Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+          cache-dependency-path: server/yarn.lock
+
+      - name: Installer les dépendances du Serveur
+        run: |
+          cd server
+          yarn install
+
+      - name: Lancer les tests unitaires
+        run: |
+          cd server
+          yarn test
+
+  build-images:
+    needs: run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code du dépôt
+        uses: actions/checkout@v4
+
+      - name: Configurer Docker Buildx
+        uses: actions/setup-buildx-action@v3
+
+      - name: Compiler l'image du Serveur (Back)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          push: false 
+          tags: mfp-server:latest
+
+      - name: Compiler l'image du Client (Front)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          push: false
+          tags: mfp-client:latest
