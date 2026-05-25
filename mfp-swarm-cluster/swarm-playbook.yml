@@ -1,0 +1,23 @@
+---
+- name: Automatisation du Cluster Docker Swarm
+  hosts: all
+  gather_facts: no
+  tasks:
+
+    - name: Initialiser le Swarm sur le Manager
+      community.docker.docker_swarm:
+        state: present
+      register: swarm_info
+      when: inventory_hostname == 'manager'
+
+    - name: Sauvegarder le token de jonction
+      set_fact:
+        join_token: "{{ hostvars['manager']['swarm_info']['swarm_facts']['join_tokens']['worker'] }}"
+      when: inventory_hostname == 'manager'
+
+    - name: Rejoindre le cluster Swarm en tant que Worker
+      community.docker.docker_swarm:
+        state: join
+        join_token: "{{ hostvars['manager']['join_token'] }}"
+        remote_addrs: [ "manager:2377" ]
+      when: inventory_hostname in groups['workers']

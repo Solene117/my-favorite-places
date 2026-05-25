@@ -1,0 +1,33 @@
+services:
+  manager:
+    image: docker:dind
+    privileged: true
+    volumes:
+      - manager_data:/var/lib/docker
+    ports:
+      - "80:80"
+      - "9000:9000"
+
+  node1:
+    image: docker:dind
+    privileged: true
+    volumes:
+      - node1_data:/var/lib/docker
+
+  node2:
+    image: docker:dind
+    privileged: true
+    volumes:
+      - node2_data:/var/lib/docker
+
+  node3:
+    image: docker:dind
+    privileged: true
+    volumes:
+      - node3_data:/var/lib/docker
+
+volumes:
+  manager_data:
+  node1_data:
+  node2_data:
+  node3_data:

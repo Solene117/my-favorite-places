@@ -40,10 +40,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # On commente ces lignes pour que Docker utilise uniquement les fichiers compilés à l'intérieur de l'image
-    # volumes:
-    #   - ./server:/app
-    #   - /app/node_modules
 
   client:
     build: ./client

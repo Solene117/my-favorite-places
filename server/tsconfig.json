@@ -38,5 +38,9 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "skipLibCheck": true
-  }
+  },
+  "exclude": [
+    "src/**/*.test.ts",
+    "node_modules"
+  ]
 }
